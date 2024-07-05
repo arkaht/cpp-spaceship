@@ -5,7 +5,7 @@ project(SPACESHIP)
 set(CMAKE_CXX_STANDARD 20)
 set(SPACESHIP_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(SPACESHIP_SOURCE "${SPACESHIP_INCLUDE}/spaceship")
-set(SPACESHIP_ASSETS "${SPACESHIP_SOURCE}/assets")
+set(SPACESHIP_ASSETS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
 #  Require Suprengine
 set(SUPRENGINE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cpp-suprengine/" CACHE FILEPATH "Path to the suprengine project")
