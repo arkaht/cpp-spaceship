@@ -66,7 +66,7 @@ void Projectile::_on_hit( const RayHit& result )
 	auto entity = result.collider->get_owner();
 
 	//  damage health component
-	if ( auto health = entity->get_component<HealthComponent>() )
+	if ( auto health = entity->find_component<HealthComponent>() )
 	{
 		DamageInfo info {};
 		info.attacker = _wk_owner.lock();

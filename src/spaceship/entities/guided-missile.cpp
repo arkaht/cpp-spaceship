@@ -141,7 +141,7 @@ void GuidedMissile::_check_impact()
 	if ( entity == _wk_owner.lock() ) return;
 
 	//  check entity has health component
-	auto health = entity->get_component<HealthComponent>();
+	auto health = entity->find_component<HealthComponent>();
 	if ( !health ) return;
 	
 	//  damage it

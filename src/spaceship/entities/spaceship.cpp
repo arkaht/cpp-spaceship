@@ -165,18 +165,22 @@ void Spaceship::launch_missiles(
 	for ( int i = 0; i < 6; i++ )
 	{
 		float row = floorf( i / 2.0f );
-		engine.add_timer( { row * 0.1f, [&engine, shared_this, wk_target, this, i, row]{
-			auto missile = engine.create_entity<GuidedMissile>( 
-				shared_this, 
-				wk_target,
-				_color 
-			);
-			missile->transform->location = transform->location 
-				+ transform->get_right() * ( i % 2 == 0 ? 1.0f : -1.0f ) * 2.0f
-				+ transform->get_forward() * row * 3.0f;
-			missile->transform->rotation = Quaternion::look_at( transform->get_up(), Vec3::up );
-			missile->up_direction = transform->get_up();
-		} } );
+		Timer timer(
+			[&engine, shared_this, wk_target, this, i, row]{
+				auto missile = engine.create_entity<GuidedMissile>( 
+					shared_this, 
+					wk_target,
+					_color 
+				);
+				missile->transform->location = transform->location 
+					+ transform->get_right() * ( i % 2 == 0 ? 1.0f : -1.0f ) * 2.0f
+					+ transform->get_forward() * row * 3.0f;
+				missile->transform->rotation = Quaternion::look_at( transform->get_up(), Vec3::up );
+				missile->up_direction = transform->get_up();
+			},
+			row * 0.1f
+		);
+		engine.add_timer( timer );
 	}
 }
 

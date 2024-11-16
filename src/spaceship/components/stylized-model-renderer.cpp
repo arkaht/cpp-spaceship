@@ -1,5 +1,7 @@
 #include "stylized-model-renderer.h"
 
+#include <gl/glew.h>
+
 using namespace spaceship;
 
 StylizedModelRenderer::StylizedModelRenderer( 
