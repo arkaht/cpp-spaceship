@@ -2,6 +2,8 @@
 
 #include <spaceship/scenes/game-scene.h>
 
+#include <suprengine/assets.h>
+
 using namespace spaceship;
 
 void GameInstance::load_assets()

@@ -4,6 +4,8 @@
 #include <spaceship/entities/explosion-effect.h>
 #include <spaceship/components/player-hud.h>
 
+#include <suprengine/assets.h>
+
 using namespace spaceship;
 
 GameScene::GameScene( GameInstance* game_instance )

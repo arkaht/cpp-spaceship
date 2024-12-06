@@ -53,10 +53,7 @@ void Spaceship::setup()
 	);
 	_model_renderer->dynamic_camera_distance_settings = dcd_settings;
 	_model_renderer->outline_scale = MODEL_OUTLINE_SCALE;
-	_collider = create_component<BoxCollider>( Box {
-		Vec3 { -2.0f, -2.0f, -2.0f },
-		Vec3 { 2.0f, 2.0f, 2.0f },
-	} );
+	_collider = create_component<BoxCollider>( Box::one * 2.0f );
 
 	//  initialize trail
 	auto trail_entity = engine.create_entity<Entity>();

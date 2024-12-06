@@ -1,6 +1,8 @@
 #include "asteroid.h"
 #include <suprengine/random.h>
 
+#include <suprengine/assets.h>
+
 using namespace spaceship;
 
 Asteroid::Asteroid()

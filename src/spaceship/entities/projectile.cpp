@@ -3,6 +3,8 @@
 #include <spaceship/entities/asteroid.h>
 #include <spaceship/entities/spaceship.h>
 
+#include <suprengine/assets.h>
+
 using namespace spaceship;
 
 Projectile::Projectile( SharedPtr<Spaceship> owner, Color color )
