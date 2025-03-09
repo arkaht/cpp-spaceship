@@ -1,6 +1,8 @@
 #pragma once
 
 #include <suprengine/core/component.h>
+#include <suprengine/math/vec3.h>
+#include <suprengine/utils/event.h>
 
 namespace spaceship
 {
