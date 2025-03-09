@@ -23,4 +23,4 @@ target_link_libraries(SPACESHIP PRIVATE SUPRENGINE)
 
 #  Copy DLLs and assets
 suprengine_copy_dlls(SPACESHIP)
-suprengine_copy_assets(SPACESHIP "spaceship")
+suprengine_symlink_assets(SPACESHIP "spaceship")
