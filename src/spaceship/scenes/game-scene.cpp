@@ -4,7 +4,7 @@
 #include <spaceship/entities/explosion-effect.h>
 #include <spaceship/components/player-hud.h>
 
-#include <suprengine/assets.h>
+#include <suprengine/core/assets.h>
 
 using namespace spaceship;
 

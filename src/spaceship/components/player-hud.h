@@ -15,11 +15,11 @@ namespace spaceship
 	{
 		float x_offset = -1.0f;
 
-		float life_time { 0.0f };
-		float scale { 1.0f };
+		float life_time = 0.0f;
+		float scale = 1.0f;
 
-		Color color { Color::transparent };
-		Color target_color { Color::white };
+		Color color = Color::transparent;
+		Color target_color = Color::white;
 	};
 
 	class PlayerHUD : public Renderer
@@ -28,6 +28,7 @@ namespace spaceship
 		PlayerHUD( 
 			SharedPtr<PlayerSpaceshipController> owner
 		);
+		~PlayerHUD();
 
 		void update( float dt ) override;
 		void render( RenderBatch* render_batch ) override;
@@ -60,6 +61,8 @@ namespace spaceship
 		const float HIT_TIME = 0.25f;
 
 	private:
+		void _on_possess_changed( SharedPtr<Spaceship> previous, SharedPtr<Spaceship> current );
+
 		void _bind_to_spaceship( SharedPtr<Spaceship> spaceship );
 		void _unbind_from_spaceship( SharedPtr<Spaceship> spaceship );
 
@@ -71,13 +74,13 @@ namespace spaceship
 		void _on_spaceship_hit( const DamageResult& result );
 
 	private:
-		Texture* _crosshair_line_texture;
-		Texture* _kill_icon_texture;
+		SharedPtr<Texture> _crosshair_line_texture = nullptr;
+		SharedPtr<Texture> _kill_icon_texture = nullptr;
 
 		Color _crosshair_color = Color::white;
-		std::vector<KillIconData> _kill_icons;
+		std::vector<KillIconData> _kill_icons {};
 		float _hit_time = 0.0f;
 
-		SharedPtr<PlayerSpaceshipController> _controller;
+		SharedPtr<PlayerSpaceshipController> _controller = nullptr;
 	};
 }

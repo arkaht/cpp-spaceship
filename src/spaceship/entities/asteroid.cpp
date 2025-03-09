@@ -1,7 +1,8 @@
 #include "asteroid.h"
-#include <suprengine/random.h>
 
-#include <suprengine/assets.h>
+#include <suprengine/core/assets.h>
+#include <suprengine/core/engine.h>
+#include <suprengine/utils/random.h>
 
 using namespace spaceship;
 
@@ -19,9 +20,7 @@ void Asteroid::setup()
 	_collider = create_component<SphereCollider>( 1.0f );
 
 	_health = create_component<HealthComponent>();
-	_health->on_damage.listen( "owner", 
-		std::bind( &Asteroid::_on_damage, this, std::placeholders::_1 ) 
-	);
+	_health->on_damage.listen( &Asteroid::_on_damage, this );
 }
 
 void Asteroid::update_this( float dt )

@@ -1,8 +1,9 @@
 #include "explosion-effect.h"
 
-#include <suprengine/assets.h>
-#include <suprengine/easing.h>
-#include <suprengine/random.h>
+#include <suprengine/core/assets.h>
+
+#include <suprengine/math/easing.h>
+#include <suprengine/utils/random.h>
 
 using namespace spaceship;
 
@@ -35,8 +36,7 @@ void ExplosionEffect::setup()
 		+ random::generate( -LIFETIME_DEVIATION, LIFETIME_DEVIATION );
 
 	_lifetime_component = create_component<LifetimeComponent>( _max_lifetime );
-	_lifetime_component->on_time_out.listen( "owner",
-		std::bind( &ExplosionEffect::kill, this ) );
+	_lifetime_component->on_time_out.listen( &Entity::kill, this );
 	
 	_scale = Vec3 {
 		random::generate( RANDOM_SCALE[0] ),

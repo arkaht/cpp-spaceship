@@ -2,7 +2,9 @@
 
 #include <spaceship/components/stylized-model-renderer.h>
 
+#include <suprengine/core/entity.h>
 #include <suprengine/components/lifetime-component.h>
+#include <suprengine/utils/ray.h>
 
 namespace spaceship
 {

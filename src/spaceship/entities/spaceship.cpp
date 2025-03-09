@@ -3,8 +3,9 @@
 #include <spaceship/entities/guided-missile.h>
 #include <spaceship/entities/explosion-effect.h>
 
-#include <suprengine/assets.h>
-#include <suprengine/random.h>
+#include <suprengine/core/assets.h>
+#include <suprengine/core/engine.h>
+#include <suprengine/utils/random.h>
 
 using namespace spaceship;
 
@@ -68,8 +69,7 @@ void Spaceship::setup()
 
 	//  health
 	_health = create_component<HealthComponent>();
-	_health->on_damage.listen( "owner", 
-		std::bind( &Spaceship::_on_damage, this, std::placeholders::_1 ) );
+	_health->on_damage.listen( &Spaceship::_on_damage, this );
 
 	//  add to list
 	_all_spaceships.push_back( as<Spaceship>() );

@@ -2,6 +2,7 @@
 
 #include <suprengine/components/colliders/sphere-collider.h>
 
+#include <suprengine/core/entity.h>
 #include <spaceship/components/stylized-model-renderer.h>
 #include <spaceship/components/health-component.h>
 

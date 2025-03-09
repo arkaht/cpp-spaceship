@@ -4,8 +4,9 @@
 #include <spaceship/entities/spaceship.h>
 #include <spaceship/entities/explosion-effect.h>
 
-#include <suprengine/assets.h>
-#include <suprengine/random.h>
+#include <suprengine/core/assets.h>
+#include <suprengine/core/engine.h>
+#include <suprengine/utils/random.h>
 
 using namespace spaceship;
 
@@ -26,8 +27,7 @@ void GuidedMissile::setup()
 	_model_renderer->draw_only_outline = true;
 
 	_lifetime_component = create_component<LifetimeComponent>( LIFETIME );
-	_lifetime_component->on_time_out.listen( "owner", 
-		std::bind( &GuidedMissile::explode, this ) );
+	_lifetime_component->on_time_out.listen( &GuidedMissile::explode, this );
 
 	_current_move_speed = move_speed * STARTING_MOVE_SPEED_RATIO;
 

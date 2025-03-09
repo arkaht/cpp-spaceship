@@ -2,8 +2,9 @@
 
 #include <spaceship/components/stylized-model-renderer.h>
 
-#include <suprengine/curve.h>
+#include <suprengine/core/entity.h>
 #include <suprengine/components/lifetime-component.h>
+#include <suprengine/utils/curve.h>
 
 namespace spaceship
 {

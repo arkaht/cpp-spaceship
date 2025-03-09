@@ -3,6 +3,7 @@
 #include <spaceship/components/stylized-model-renderer.h>
 #include <spaceship/components/health-component.h>
 
+#include <suprengine/core/entity.h>
 #include <suprengine/components/lifetime-component.h>
 
 namespace spaceship

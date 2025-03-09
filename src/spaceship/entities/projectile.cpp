@@ -3,7 +3,8 @@
 #include <spaceship/entities/asteroid.h>
 #include <spaceship/entities/spaceship.h>
 
-#include <suprengine/assets.h>
+#include <suprengine/core/assets.h>
+#include <suprengine/core/engine.h>
 
 using namespace spaceship;
 
@@ -20,8 +21,7 @@ void Projectile::setup()
 	_model_renderer->draw_only_outline = true;
 
 	_lifetime_component = create_component<LifetimeComponent>( LIFETIME );
-	_lifetime_component->on_time_out.listen( "owner", 
-		std::bind( &Projectile::kill, this ) );
+	_lifetime_component->on_time_out.listen( &Entity::kill, this );
 }
 
 void Projectile::update_this( float dt )

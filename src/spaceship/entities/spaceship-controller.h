@@ -1,6 +1,6 @@
 #pragma once
 
-#include <suprengine/entity.h>
+#include <suprengine/core/entity.h>
 
 namespace spaceship
 {

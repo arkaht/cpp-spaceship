@@ -18,8 +18,6 @@ void SpaceshipController::possess( SharedPtr<Spaceship> ship )
 	unpossess();
 	_suppress_event = false;
 
-	//auto ptr = get_shared_from_this<SpaceshipController>();
-
 	//  force unpossess previous controller
 	if ( auto controller = ship->wk_controller.lock() )
 	{

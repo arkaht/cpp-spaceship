@@ -2,6 +2,11 @@
 
 #include <spaceship/entities/spaceship.h>
 
+namespace suprengine
+{
+	class Camera;
+}
+
 namespace spaceship
 {
 	class PlayerHUD;

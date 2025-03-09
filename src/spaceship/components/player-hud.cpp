@@ -2,8 +2,9 @@
 
 #include <spaceship/entities/player-spaceship-controller.h>
 
-#include <suprengine/assets.h>
-#include <suprengine/easing.h>
+#include <suprengine/core/assets.h>
+#include <suprengine/core/engine.h>
+#include <suprengine/math/easing.h>
 
 using namespace spaceship;
 
@@ -12,17 +13,20 @@ PlayerHUD::PlayerHUD(
 )
 	: _controller( owner )
 {
-	_controller->on_possess_changed.listen( "player-hud",
-		[&]( SharedPtr<Spaceship> previous, SharedPtr<Spaceship> current )
-		{
-			_unbind_from_spaceship( previous );
-			_bind_to_spaceship( current );
-		}
-	);
+	_controller->on_possess_changed.listen( &PlayerHUD::_on_possess_changed, this );
 
 	_crosshair_line_texture = Assets::get_texture( "crosshair-line" );
 	_kill_icon_texture = Assets::get_texture( "kill-icon" );
 	KILL_ICON_TEXTURE_SCALE = KILL_ICON_SIZE / _kill_icon_texture->get_size().x;
+}
+
+PlayerHUD::~PlayerHUD()
+{
+	if ( !_controller ) return;
+
+	_controller->on_possess_changed.unlisten( &PlayerHUD::_on_possess_changed, this );
+
+	_unbind_from_spaceship( _controller->get_ship() );
 }
 
 void PlayerHUD::update( float dt )
@@ -153,6 +157,12 @@ void PlayerHUD::render( RenderBatch* render_batch )
 	}
 }
 
+void PlayerHUD::_on_possess_changed( SharedPtr<Spaceship> previous, SharedPtr<Spaceship> current )
+{
+	_unbind_from_spaceship( previous );
+	_bind_to_spaceship( current );
+}
+
 void PlayerHUD::_bind_to_spaceship( SharedPtr<Spaceship> spaceship )
 {
 	if ( !spaceship ) return;
@@ -161,15 +171,14 @@ void PlayerHUD::_bind_to_spaceship( SharedPtr<Spaceship> spaceship )
 	_crosshair_color = spaceship->get_color();
 
 	//  events
-	spaceship->on_hit.listen( "player-hud", 
-		std::bind( &PlayerHUD::_on_spaceship_hit, this, std::placeholders::_1 ) );
+	spaceship->on_hit.listen( &PlayerHUD::_on_spaceship_hit, this );
 }
 
 void PlayerHUD::_unbind_from_spaceship( SharedPtr<Spaceship> spaceship )
 {
 	if ( !spaceship ) return;
 
-	spaceship->on_hit.unlisten( "player-hud" );
+	spaceship->on_hit.unlisten( &PlayerHUD::_on_spaceship_hit, this );
 }
 
 void PlayerHUD::_draw_crosshair( 

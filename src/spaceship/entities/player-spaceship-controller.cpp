@@ -1,8 +1,9 @@
 #include "player-spaceship-controller.h"
 
-#include <suprengine/easing.h>
-
 #include <spaceship/components/player-hud.h>
+
+#include <suprengine/core/engine.h>
+#include <suprengine/math/easing.h>
 
 using namespace spaceship;
 
