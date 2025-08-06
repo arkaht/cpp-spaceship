@@ -25,7 +25,7 @@ namespace spaceship
 	class PlayerHUD : public Renderer
 	{
 	public:
-		PlayerHUD( 
+		explicit PlayerHUD(
 			SharedPtr<PlayerSpaceshipController> owner
 		);
 		~PlayerHUD();
@@ -41,7 +41,7 @@ namespace spaceship
 	private:
 		const float CROSSHAIR_DISTANCE = 500.0f;
 		const float CROSSHAIR_START_ANGLE = math::HALF_PI;
-		const float CROSSHAIR_LINES_COUNT = 3;
+		const int   CROSSHAIR_LINES_COUNT = 3;
 		const float CROSSHAIR_LINES_DISTANCE = 14.0f;
 		const float CROSSHAIR_LINES_SHOOT_DISTANCE = 3.0f;
 		const Vec2  CROSSHAIR_LINES_SHOOT_SCALE { 0.25f, 0.85f };

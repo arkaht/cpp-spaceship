@@ -98,29 +98,29 @@ void PlayerHUD::update( float dt )
 
 void PlayerHUD::render( RenderBatch* render_batch )
 {
-	auto& engine = Engine::instance();
-	auto window = engine.get_window();
-	auto camera = engine.camera;
+	Engine& engine = Engine::instance();
+	const Window* window = engine.get_window();
+	const Camera* camera = engine.camera;
 
-	auto spaceship = _controller->get_ship();
+	const SharedPtr<Spaceship> spaceship = _controller->get_ship();
 	if ( !spaceship ) return;
 
-	Vec2 window_size = window->get_size();
+	const Vec2 window_size = window->get_size();
 
 	//  render crosshair
 	{
 		Vec3 aim_location = spaceship->get_shoot_location( Vec3 { 1.0f, 0.0f, 1.0f } );
 		aim_location += spaceship->transform->get_forward() * CROSSHAIR_DISTANCE;
 
-		Vec3 crosshair_pos = camera->world_to_viewport( aim_location );
+		const Vec3 crosshair_pos = camera->world_to_viewport( aim_location );
 		if ( crosshair_pos.z > 0.0f )
 		{
-			_draw_crosshair( render_batch, crosshair_pos );
+			_draw_crosshair( render_batch, Vec2( crosshair_pos ) );
 		}
 	}
 
 	//  render kill icons
-	int count = (int)_kill_icons.size();
+	const int count = static_cast<int>( _kill_icons.size() );
 	for ( int i = 0; i < count; i++ )
 	{
 		const auto& data = _kill_icons[i];
@@ -186,19 +186,15 @@ void PlayerHUD::_draw_crosshair(
 	const Vec2& pos
 )
 {
-	auto spaceship = _controller->get_ship();
+	const SharedPtr<Spaceship> spaceship = _controller->get_ship();
 
-	const float angle_iter = math::DOUBLE_PI / CROSSHAIR_LINES_COUNT;
-	
-	float shoot_ratio = 
-		easing::in_out_cubic( spaceship->get_shoot_time() / 0.15f );
-	float hit_ratio =
-		easing::in_out_cubic( _hit_time / HIT_TIME );
+	const float angle_iter = math::DOUBLE_PI / static_cast<float>( CROSSHAIR_LINES_COUNT );
 
-	float distance = CROSSHAIR_LINES_DISTANCE 
-		+ CROSSHAIR_LINES_SHOOT_DISTANCE * shoot_ratio;
-	Vec2 scale = CROSSHAIR_LINE_SCALE
-		+ CROSSHAIR_LINES_SHOOT_SCALE * hit_ratio;
+	const float shoot_ratio = easing::in_out_cubic( spaceship->get_shoot_time() / 0.15f );
+	const float hit_ratio = easing::in_out_cubic( _hit_time / HIT_TIME );
+
+	const float distance = CROSSHAIR_LINES_DISTANCE + CROSSHAIR_LINES_SHOOT_DISTANCE * shoot_ratio;
+	const Vec2 scale = CROSSHAIR_LINE_SCALE + CROSSHAIR_LINES_SHOOT_SCALE * hit_ratio;
 
 	float angle = CROSSHAIR_START_ANGLE;
 	for ( int i = 0; i < CROSSHAIR_LINES_COUNT; i++ )

@@ -1,5 +1,7 @@
 #include "health-component.h"
 
+#include <suprengine/math/math.h>
+
 using namespace spaceship;
 
 HealthComponent::HealthComponent( float health )

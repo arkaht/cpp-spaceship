@@ -37,8 +37,8 @@ namespace spaceship
 	private:
 		//  Aim sensitivity for each axis
 		const Vec3 AIM_SENSITIVITY { 
-			0.09f,		//  mouse-x: roll
-			0.09f,		//  mouse-y: pitch
+			0.025f,		//  mouse-x: roll
+			0.025f,		//  mouse-y: pitch
 			0.10f		//  Q-D: yaw
 		};
 		//  Aim velocity loss per second
