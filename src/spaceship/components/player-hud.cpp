@@ -100,7 +100,7 @@ void PlayerHUD::render( RenderBatch* render_batch )
 {
 	Engine& engine = Engine::instance();
 	const Window* window = engine.get_window();
-	const Camera* camera = engine.camera;
+	const Camera* camera = engine.get_camera( 0 );
 
 	const SharedPtr<Spaceship> spaceship = _controller->get_ship();
 	if ( !spaceship ) return;

@@ -6,53 +6,52 @@
 
 using namespace spaceship;
 
-StylizedModelRenderer::StylizedModelRenderer( 
-	SharedPtr<Model> model, 
-	Color modulate, 
-	int priority_order 
+StylizedModelRenderer::StylizedModelRenderer(
+	const SharedPtr<Model>& model,
+	const Color modulate,
+	const int priority_order
 )
 	: ModelRenderer( 
-		model, 
-		"stylized", 
-		modulate, 
-		priority_order 
+		model,
+		"stylized",
+		modulate,
+		priority_order
 	) {}
 
 void StylizedModelRenderer::render( RenderBatch* render_batch )
 {
-	//  get offset scale
+	// Get offset scale
 	float offset_scale = 1.0f;
 	if ( dynamic_camera_distance_settings.is_active )
 	{
-		auto& engine = Engine::instance();
-		auto camera = engine.camera;
+		const Engine& engine = Engine::instance();
+		const Camera* camera = engine.get_camera( 0 );
 
-		//  compute distances
-		Vec3 dist = transform->location - camera->transform->location;
-		float dist_sqr = math::min( 
+		// Compute distances
+		const Vec3 dist = transform->location - camera->transform->location;
+		const float dist_sqr = math::min(
 			dynamic_camera_distance_settings.max_distance_sqr, 
 			dist.length_sqr()
 		);
 
-		//  add offset scale
-		float offset = math::lerp( 
+		// Add offset scale
+		const float offset = math::lerp(
 			outline_scale, 
 			dynamic_camera_distance_settings.max_outline_scale,
 			dist_sqr / dynamic_camera_distance_settings.max_distance_sqr
 		);
 		offset_scale += offset;
-		//printf( "%f\n", offset );
 	}
 	else
 	{
 		offset_scale += outline_scale;
 	}
 
-	//  draw outline
+	// Draw outline mesh
 	if ( !math::near_value( offset_scale, 1.0f ) )
 	{
 		//  compute outline matrix
-		Mtx4 outline_matrix = Mtx4::create_from_transform( 
+		const Mtx4 outline_matrix = Mtx4::create_from_transform(
 			transform->scale * offset_scale,
 			transform->rotation,
 			transform->location
@@ -67,7 +66,7 @@ void StylizedModelRenderer::render( RenderBatch* render_batch )
 		);
 	}
 
-	//  draw inner
+	// Draw inner mesh
 	if ( !draw_only_outline )
 	{
 		glFrontFace( GL_CW );

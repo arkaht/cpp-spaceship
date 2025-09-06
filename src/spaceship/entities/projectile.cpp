@@ -8,7 +8,7 @@
 
 using namespace spaceship;
 
-Projectile::Projectile( SharedPtr<Spaceship> owner, Color color )
+Projectile::Projectile( const SharedPtr<Spaceship>& owner, const Color color )
 	: _wk_owner( owner ), _color( color )
 {}
 
@@ -24,29 +24,29 @@ void Projectile::setup()
 	_lifetime_component->on_time_out.listen( &Entity::kill, this );
 }
 
-void Projectile::update_this( float dt )
+void Projectile::update_this( const float dt )
 {
-	float movement_speed = move_speed * dt;
-	Vec3 movement = transform->get_forward() * movement_speed;
-	Vec3 new_location = transform->location + movement;
+	const float movement_speed = move_speed * dt;
+	const Vec3 movement = transform->get_forward() * movement_speed;
+	const Vec3 new_location = transform->location + movement;
 	if ( _check_collisions( movement_speed ) ) return;
 
 	//  movement
 	transform->set_location( new_location );
 }
 
-bool Projectile::_check_collisions( float movement_speed )
+bool Projectile::_check_collisions( const float movement_speed )
 {
-	auto& engine = Engine::instance();
-	auto physics = engine.get_physics();
+	const Engine& engine = Engine::instance();
+	Physics* physics = engine.get_physics();
 
 	//  setup ray
-	Ray ray( 
+	const Ray ray(
 		transform->location, 
 		transform->get_forward(), 
 		movement_speed 
 	);
-	RayParams params {};
+	const RayParams params {};
 
 	//  check safe movement 
 	RayHit result;
@@ -65,24 +65,24 @@ bool Projectile::_check_collisions( float movement_speed )
 
 void Projectile::_on_hit( const RayHit& result )
 {
-	auto entity = result.collider->get_owner();
+	const SharedPtr<Entity> entity = result.collider->get_owner();
 
-	//  damage health component
-	if ( auto health = entity->find_component<HealthComponent>() )
+	// Damage health component
+	if ( const SharedPtr<HealthComponent> health = entity->find_component<HealthComponent>())
 	{
 		DamageInfo info {};
 		info.attacker = _wk_owner.lock();
 		info.damage = damage_amount;
 		info.knockback = -result.normal * knockback_force;
 
-		DamageResult result = health->damage( info );
+		const DamageResult damage_result = health->damage( info );
 
-		//  alert owner
-		if ( result.is_valid )
+		// Alert owner
+		if ( damage_result.is_valid )
 		{
-			if ( auto owner = _wk_owner.lock() )
+			if ( const SharedPtr<Spaceship> owner = _wk_owner.lock() )
 			{
-				owner->on_hit.invoke( result );
+				owner->on_hit.invoke( damage_result );
 			}
 		}
 	}

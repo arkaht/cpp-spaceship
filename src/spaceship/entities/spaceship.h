@@ -25,7 +25,7 @@ namespace spaceship
 		) const;
 
 		void shoot();
-		void launch_missiles( WeakPtr<HealthComponent> wk_target );
+		void launch_missiles(const WeakPtr<HealthComponent>& wk_target);
 		
 		void die();
 		void respawn();

@@ -10,10 +10,10 @@
 
 using namespace spaceship;
 
-GuidedMissile::GuidedMissile( 
-	SharedPtr<Spaceship> owner, 
-	WeakPtr<HealthComponent> wk_target,
-	Color color 
+GuidedMissile::GuidedMissile(
+	const SharedPtr<Spaceship>& owner,
+	const WeakPtr<HealthComponent>& wk_target,
+	const Color color
 )
 	: _wk_owner( owner ), _wk_target( wk_target ), _color( color )
 {}
@@ -32,7 +32,7 @@ void GuidedMissile::setup()
 	_current_move_speed = move_speed * STARTING_MOVE_SPEED_RATIO;
 
 	//  set initial target direction
-	if ( auto target = _wk_target.lock() )
+	if ( const SharedPtr<HealthComponent> target = _wk_target.lock())
 	{
 		_desired_direction = 
 			( target->transform->location - transform->location ).normalized();
@@ -70,45 +70,43 @@ void GuidedMissile::update_this( float dt )
 
 void GuidedMissile::explode()
 {
-	//  spawn explosion effect
+	// Spawn explosion effect
 	{
 		Color color = Color::white;
-		if ( auto owner = _wk_owner.lock() )
+		if ( const SharedPtr<Spaceship> owner = _wk_owner.lock() )
 		{
 			color = owner->get_color();
 		}
 
-		float size = explosion_size
+		const float size = explosion_size
 			+ random::generate( EXPLOSION_SIZE_DEVIATION.x, EXPLOSION_SIZE_DEVIATION.y );
 
-		auto& engine = Engine::instance();
-		auto effect = engine.create_entity<ExplosionEffect>( explosion_size, color );
+		Engine& engine = Engine::instance();
+		const SharedPtr<ExplosionEffect> effect = engine.create_entity<ExplosionEffect>( size, color );
 		effect->transform->location = transform->location;
 	}
 
 	kill();
 }
 
-void GuidedMissile::_update_target( float dt )
+void GuidedMissile::_update_target( const float dt )
 {
-	if ( auto target = _wk_target.lock() )
+	if ( const SharedPtr<HealthComponent> target = _wk_target.lock())
 	{
-		//  invalidate target if dead
+		// Invalidate target if dead
 		if ( !target->is_alive() )
 		{
 			_wk_target.reset();
 		}
 		else
 		{
-			//  update direction
-			_desired_direction = 
-				( target->transform->location - transform->location ).normalized();
+			// Update direction
+			_desired_direction = ( target->transform->location - transform->location ).normalized();
 		}
 	}
 
-	//  rotate towards target
-	Quaternion look_rotation = Quaternion::look_at( 
-		_desired_direction, up_direction );
+	// Rotate towards target
+	const Quaternion look_rotation = Quaternion::look_at( _desired_direction, up_direction );
 	transform->set_rotation(
 		Quaternion::slerp(
 			transform->rotation,
@@ -120,11 +118,11 @@ void GuidedMissile::_update_target( float dt )
 
 void GuidedMissile::_check_impact()
 {
-	auto& engine = Engine::instance();
-	auto physics = engine.get_physics();
+	const Engine& engine = Engine::instance();
+	Physics* physics = engine.get_physics();
 
-	//  setup raycast
-	Ray ray( 
+	// Setup raycast
+	const Ray ray(
 		transform->location, 
 		transform->get_forward(), 
 		impact_distance 
@@ -132,45 +130,43 @@ void GuidedMissile::_check_impact()
 	RayParams params {};
 	params.can_hit_from_origin = false;
 
-	//  check collisions
+	// Check collisions
 	RayHit hit {};
 	if ( !physics->raycast( ray, &hit, params ) ) return;
 	
-	//  check entity is not owner
-	auto entity = hit.collider->get_owner();
+	// Check entity is not owner
+	const SharedPtr<Entity> entity = hit.collider->get_owner();
 	if ( entity == _wk_owner.lock() ) return;
 
-	//  check entity has health component
-	auto health = entity->find_component<HealthComponent>();
+	// Check entity has health component
+	const SharedPtr<HealthComponent> health = entity->find_component<HealthComponent>();
 	if ( !health ) return;
 	
 	//  damage it
 	_damage( health );
-	//printf( "hit %p (self:%p)\n", hit.collider->get_owner(), this );
 }
 
-void GuidedMissile::_damage( SharedPtr<HealthComponent> target )
+void GuidedMissile::_damage( const SharedPtr<HealthComponent>& target )
 {
 	if ( !target ) return;
 	
-	Vec3 diff = target->transform->location - transform->location;
+	const Vec3 diff = target->transform->location - transform->location;
 
-	//  damage
+	// Damage
 	DamageInfo info {};
 	info.attacker = _wk_owner.lock();
 	info.damage = damage_amount;
 	info.knockback = diff.normalized() * knockback_force;
-	DamageResult result = target->damage( info );
+	const DamageResult result = target->damage( info );
 
-	//  alert owner
+	// Alert owner
 	if ( result.is_valid )
 	{
-		if ( auto owner = _wk_owner.lock() )
+		if ( const SharedPtr<Spaceship> owner = _wk_owner.lock())
 		{
 			owner->on_hit.invoke( result );
 		}
 	}
 
 	explode();
-	//printf( "boom\n" );
 }

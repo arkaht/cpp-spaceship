@@ -9,46 +9,46 @@ SpaceshipController::~SpaceshipController()
 	unpossess();
 }
 
-void SpaceshipController::possess( SharedPtr<Spaceship> ship )
+void SpaceshipController::possess( const SharedPtr<Spaceship>& ship )
 {
-	auto previous_ship = get_ship();
+	const SharedPtr<Spaceship> previous_ship = get_ship();
 
-	//  unpossess
+	// Un-possess
 	_suppress_event = true;
 	unpossess();
 	_suppress_event = false;
 
-	//  force unpossess previous controller
-	if ( auto controller = ship->wk_controller.lock() )
+	// Force un-possess previous controller
+	if ( const SharedPtr<SpaceshipController> controller = ship->wk_controller.lock())
 	{
 		controller->unpossess();
 	}
 
-	//  possess
+	// Possess
 	_possessed_ship = ship;
 	ship->wk_controller = as<SpaceshipController>();
 	on_possess();
 
-	//  invoke event
+	// Invoke event
 	on_possess_changed.invoke( previous_ship, ship );
 }
 
 void SpaceshipController::unpossess()
 {
-	auto previous_ship = get_ship();
+	const SharedPtr<Spaceship> previous_ship = get_ship();
 	if ( !previous_ship ) return;
 
-	//  reset controller of owned ship
+	// Reset controller of owned ship
 	if ( previous_ship->wk_controller.lock().get() == this )
 	{
 		previous_ship->wk_controller.reset();
 	}
 
-	//  reset pointer
+	// Reset pointer
 	on_unpossess();
 	_possessed_ship.reset();
 
-	//  invoke event
+	// Invoke event
 	if ( !_suppress_event )
 	{
 		on_possess_changed.invoke( previous_ship, nullptr );

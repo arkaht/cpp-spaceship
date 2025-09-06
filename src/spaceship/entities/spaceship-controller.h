@@ -23,7 +23,7 @@ namespace spaceship
 	public:
 		virtual ~SpaceshipController();
 
-		void possess( SharedPtr<Spaceship> ship );
+		void possess(const SharedPtr<Spaceship>& ship);
 		void unpossess();
 
 		SharedPtr<Spaceship> get_ship() const { return _possessed_ship.lock(); }

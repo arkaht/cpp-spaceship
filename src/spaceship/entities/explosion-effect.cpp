@@ -8,14 +8,14 @@
 using namespace spaceship;
 
 ExplosionEffect::ExplosionEffect( 
-	float explosion_size,
-	Color color,
+	const float explosion_size,
+	const Color color,
 	int model_id
 )
 	: explosion_size( explosion_size ),
 	  color( color )
 {
-	//  randomize model if unspecified
+	// Randomize model if unspecified
 	if ( model_id < 0 )
 	{
 		model_id = random::generate( 0, 2 );
@@ -45,37 +45,37 @@ void ExplosionEffect::setup()
 	};
 	transform->rotation = random::generate_rotation();
 
-	//  get curves
+	// Get curves
 	_curve_transform_scale = Assets::get_curve( "explosion/transform-scale" );
 	_curve_outline_scale = Assets::get_curve( "explosion/outline-scale" );
 	_curve_outline_color = Assets::get_curve( "explosion/outline-color" );
 	_curve_inner_color = Assets::get_curve( "explosion/inner-color" );
 }
 
-void ExplosionEffect::update_this( float dt )
+void ExplosionEffect::update_this( const float dt )
 {
 	const float lifetime = _max_lifetime - _lifetime_component->life_time;
 	const float t = lifetime / _max_lifetime;
 
-	//  lerp outline color
+	// Lerp outline color
 	_model_renderer->modulate = Color::lerp(
 		Color::white, 
 		color,
 		_curve_outline_color->evaluate_by_time( t )
 	);
 
-	//  lerp inner color
+	// Lerp inner color
 	_model_renderer->inner_modulate = Color::lerp( 
 		color,
 		Color::black,
 		_curve_inner_color->evaluate_by_time( t )
 	);
 	
-	//  apply outline scale
+	// Apply outline scale
 	_model_renderer->outline_scale = 
 		_curve_outline_scale->evaluate_by_time( t ) * OUTLINE_SCALE;
 	
-	//  apply transform scale
+	// Apply transform scale
 	transform->set_scale( 
 			explosion_size 
 		* _curve_transform_scale->evaluate_by_time( t ) 

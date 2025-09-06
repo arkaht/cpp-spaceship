@@ -7,12 +7,11 @@ AISpaceshipController::AISpaceshipController()
 
 void AISpaceshipController::update_inputs( float dt )
 {
-	auto ship = get_ship();
+	const SharedPtr<Spaceship> ship = get_ship();
 
-	if ( auto target = wk_target.lock() )
+	if ( const SharedPtr<Spaceship> target = wk_target.lock())
 	{
-		const Vec3 dir = 
-			target->transform->location - ship->transform->location;
+		const Vec3 dir = target->transform->location - ship->transform->location;
 		const Vec3 normalized_dir = dir.normalized();
 
 		const Quaternion desired_rotation = Quaternion::look_at( 
@@ -20,20 +19,18 @@ void AISpaceshipController::update_inputs( float dt )
 			Vec3::up
 		);
 
-		float forward_alignement = Vec3::dot( 
+		const float forward_alignement = Vec3::dot(
 			normalized_dir, 
 			ship->transform->get_forward() 
 		);
 
 		//  shoot if aligned
-		if ( ship->get_shoot_time() <= 0.0f 
-			&& forward_alignement >= 0.9f )
+		if ( ship->get_shoot_time() <= 0.0f && forward_alignement >= 0.9f )
 		{
 			ship->shoot();
 		}
 
 		_inputs.throttle_delta = forward_alignement;
-		//printf( "%f\n", _inputs.throttle_delta );
 
 		_inputs.desired_rotation = desired_rotation;
 

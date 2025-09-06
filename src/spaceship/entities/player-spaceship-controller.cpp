@@ -29,16 +29,16 @@ void PlayerSpaceshipController::setup()
 	//  initialize camera
 	auto camera_owner = engine.create_entity<Entity>();
 	camera = camera_owner->create_component<Camera>( projection_settings );
-	camera->activate();
+	camera->set_active();
 
 	//  test: second camera
 	camera_owner = engine.create_entity<Entity>();
 	camera_owner->transform->scale = Vec3( 10.0f );
 }
 
-void PlayerSpaceshipController::update_this( float dt )
+void PlayerSpaceshipController::update_this( const float dt )
 {
-	auto ship = get_ship();
+	const SharedPtr<Spaceship> ship = get_ship();
 	if ( !ship || ship->state != EntityState::Active ) return;
 
 	_update_shoot( dt );
@@ -53,28 +53,26 @@ void PlayerSpaceshipController::on_unpossess()
 {
 }
 
-void PlayerSpaceshipController::update_inputs( float dt )
+void PlayerSpaceshipController::update_inputs( const float dt )
 {
 	if ( !is_inputs_enabled ) return;
 
-	auto& engine = Engine::instance();
-	auto inputs = engine.get_inputs();
-	auto ship = get_ship();
+	const Engine& engine = Engine::instance();
+	const InputManager* inputs = engine.get_inputs();
+	const SharedPtr<Spaceship> ship = get_ship();
 
-	//  movement inputs
-	_inputs.throttle_delta = inputs->get_keys_as_axis( 
-		SDL_SCANCODE_S, SDL_SCANCODE_W, 1.0f );
+	// Movement inputs
+	_inputs.throttle_delta = inputs->get_keys_as_axis( PhysicalKey::S, PhysicalKey::W, 1.0f );
 
-	//  rotation inputs
-	Vec2 mouse_delta = -inputs->mouse_delta;
-	float yaw_delta = inputs->get_keys_as_axis( 
-		SDL_SCANCODE_A, SDL_SCANCODE_D, 1.0f );
-	float roll_delta = mouse_delta.x;
-	float pitch_delta = mouse_delta.y;
-
-	//  handle aim velocity
+	// Handle aim velocity
 	{
-		//  add inputs
+		// Rotation inputs
+		const Vec2 mouse_delta = -inputs->mouse_delta;
+		const float yaw_delta = inputs->get_keys_as_axis( PhysicalKey::A, PhysicalKey::D, 1.0f );
+		const float roll_delta = mouse_delta.x;
+		const float pitch_delta = mouse_delta.y;
+
+		// Add inputs
 		_aim_velocity.x = math::clamp( 
 			_aim_velocity.x + roll_delta * AIM_SENSITIVITY.x, 
 			-MAX_AIM_VELOCITY, 
@@ -91,7 +89,7 @@ void PlayerSpaceshipController::update_inputs( float dt )
 			MAX_AIM_VELOCITY
 		);
 
-		//  drag to zero
+		// Drag to zero
 		_aim_velocity = Vec3::lerp( 
 			_aim_velocity, 
 			Vec3::zero,
@@ -99,7 +97,7 @@ void PlayerSpaceshipController::update_inputs( float dt )
 		);
 	}
 
-	//  input rotation
+	// Input rotation
 	Quaternion rotation = ship->transform->rotation;
 	rotation = rotation + Quaternion( 
 		ship->transform->get_forward(), 
@@ -115,64 +113,56 @@ void PlayerSpaceshipController::update_inputs( float dt )
 	);
 	_inputs.desired_rotation = rotation;
 
-	//  we want the player to directly control its rotation, 
-	//  so no smoothing
+	// We want the player to directly control its rotation, so no smoothing.
 	_inputs.should_smooth_rotation = false;
 }
 
 void PlayerSpaceshipController::_update_shoot( float dt )
 {
-	auto& engine = Engine::instance();
-	auto inputs = engine.get_inputs();
-	auto ship = get_ship();
+	const Engine& engine = Engine::instance();
+	const InputManager* inputs = engine.get_inputs();
+	const SharedPtr<Spaceship> ship = get_ship();
 
-	//  shoot
-	if ( inputs->is_mouse_button_down( MouseButton::Left )
-	  && ship->get_shoot_time() <= 0.0f ) 
+	// Shoot
+	if ( inputs->is_mouse_button_down( MouseButton::Left ) && ship->get_shoot_time() <= 0.0f )
 	{
 		ship->shoot();
 	}
 
-	//  missile
+	// Missile
 	_wk_locked_target = ship->find_lockable_target( camera->transform->get_forward() );
 
 	if ( inputs->is_mouse_button_just_pressed( MouseButton::Right ) )
 	{
-		if ( auto target = _wk_locked_target.lock() )
+		if ( const SharedPtr<Spaceship> target = _wk_locked_target.lock() )
 		{
-			ship->launch_missiles( 
-				target->get_health_component() 
-			);
+			ship->launch_missiles( target->get_health_component() );
 		}
 	}
 }
 
-void PlayerSpaceshipController::_update_camera( float dt )
+void PlayerSpaceshipController::_update_camera( const float dt )
 {
-	auto& engine = Engine::instance();
-	auto inputs = engine.get_inputs();
-	auto ship = get_ship();
+	const Engine& engine = Engine::instance();
+	const InputManager* inputs = engine.get_inputs();
+	const SharedPtr<Spaceship> ship = get_ship();
 
-	//  get parameters
+	// Get parameters
 	const float throttle = ship->get_throttle();
-	const float throttle_ratio = easing::in_out_cubic( 
-		throttle / 1.0f );
-	const float smooth_move_speed = math::lerp( 
-		CAMERA_MOVE_SPEED.x, CAMERA_MOVE_SPEED.y, throttle_ratio );
-	const float up_distance = math::lerp( 
-		CAMERA_UP_RANGE.x, CAMERA_UP_RANGE.y, throttle_ratio );
+	const float throttle_ratio = easing::in_out_cubic( throttle / 1.0f );
+	const float smooth_move_speed = math::lerp( CAMERA_MOVE_SPEED.x, CAMERA_MOVE_SPEED.y, throttle_ratio );
+	const float up_distance = math::lerp( CAMERA_UP_RANGE.x, CAMERA_UP_RANGE.y, throttle_ratio );
 
-	//  get axes
+	// Get axes
 	const Vec3 up = ship->transform->get_up();
 	const Vec3 forward = ship->transform->get_forward();
 	
-	//  find targets location & rotation
-	Vec3 target_location = ship->transform->location
-	  + up * up_distance;
+	// Find targets location & rotation
+	Vec3 target_location = ship->transform->location + up * up_distance;
 	Quaternion target_rotation = ship->transform->rotation;
 	if ( inputs->is_mouse_button_down( MouseButton::Middle ) )
 	{
-		float distance = math::lerp( 
+		const float distance = math::lerp(
 			CAMERA_LOOK_BACKWARD_DISTANCE.x, 
 			CAMERA_LOOK_BACKWARD_DISTANCE.y, 
 			throttle  //  looks better on linearly progressive distance
@@ -185,7 +175,7 @@ void PlayerSpaceshipController::_update_camera( float dt )
 	}
 	else
 	{
-		float distance = math::lerp( 
+		const float distance = math::lerp(
 			CAMERA_BACKWARD.x, 
 			CAMERA_BACKWARD.y, 
 			throttle_ratio 
@@ -193,8 +183,8 @@ void PlayerSpaceshipController::_update_camera( float dt )
 		target_location += forward * -distance;
 	}
 
-	//  apply location & rotation
-	Vec3 location = Vec3::lerp( 
+	// Apply location & rotation
+	const Vec3 location = Vec3::lerp(
 		camera->transform->location,
 		target_location,
 		dt * smooth_move_speed
@@ -207,15 +197,15 @@ void PlayerSpaceshipController::_update_camera( float dt )
 	camera->transform->set_location( location );
 	camera->transform->set_rotation( rotation );
 
-	//  update up direction for roll
+	// Update up direction for roll
 	camera->up_direction = Vec3::lerp( 
 		camera->up_direction, 
 		up, 
 		dt * CAMERA_ROTATION_SPEED 
 	);
 
-	//  update fov
-	float fov = math::lerp( 
+	// Update fov
+	const float fov = math::lerp(
 		CAMERA_FOV.x, 
 		CAMERA_FOV.y, 
 		throttle_ratio

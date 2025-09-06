@@ -16,9 +16,9 @@ namespace spaceship
 	class GuidedMissile : public Entity
 	{
 	public:
-		GuidedMissile( 
-			SharedPtr<Spaceship> owner,
-			WeakPtr<HealthComponent> wk_target, 
+		GuidedMissile(
+			const SharedPtr<Spaceship>& owner,
+			const WeakPtr<HealthComponent>& wk_target,
 			Color color 
 		);
 
@@ -46,7 +46,7 @@ namespace spaceship
 		void _update_target( float dt );
 		void _check_impact();
 
-		void _damage( SharedPtr<HealthComponent> target );
+		void _damage(const SharedPtr<HealthComponent>& target );
 
 	private:
 		const float LIFETIME = 6.0f;

@@ -15,7 +15,7 @@ namespace spaceship
 	class Projectile : public Entity
 	{
 	public:
-		Projectile( SharedPtr<Spaceship> owner, Color color );
+		Projectile(const SharedPtr<Spaceship>& owner, Color color );
 
 		void setup() override;
 		void update_this( float dt ) override;
