@@ -177,22 +177,28 @@ void PlayerSpaceshipController::_update_camera( const float dt )
 	// Get axes
 	const Vec3 up = ship->transform->get_up();
 	const Vec3 forward = ship->transform->get_forward();
-	
-	// Find targets location & rotation
+
+	const InputAction<bool>* rearview_input_action = inputs->get_action<bool>( REARVIEW_INPUT_ACTION_NAME );
+
+	// Rearview feature
 	Vec3 target_location = ship->transform->location + up * up_distance;
-	Quaternion target_rotation = ship->transform->rotation;
-	if ( inputs->is_mouse_button_down( MouseButton::Middle ) )
+	if ( _input_component->read_value( rearview_input_action ) )
 	{
 		const float distance = math::lerp(
-			CAMERA_LOOK_BACKWARD_DISTANCE.x, 
-			CAMERA_LOOK_BACKWARD_DISTANCE.y, 
-			throttle  //  looks better on linearly progressive distance
+			CAMERA_REARVIEW_DISTANCE.x,
+			CAMERA_REARVIEW_DISTANCE.y,
+			throttle  // Looks better on linearly progressive distance
 		);
 		target_location += forward * distance;
-		target_rotation = Quaternion::concatenate( 
-			target_rotation, 
+		camera->transform->set_location( target_location );
+
+		const Quaternion rearview_rotation = Quaternion::concatenate(
+			ship->transform->rotation,
 			Quaternion( up, math::PI ) 
 		);
+		camera->transform->set_rotation( rearview_rotation );
+
+		_is_rearview_enabled = true;
 	}
 	else
 	{
@@ -202,21 +208,35 @@ void PlayerSpaceshipController::_update_camera( const float dt )
 			throttle_ratio 
 		);
 		target_location += forward * -distance;
-	}
 
-	// Apply location & rotation
-	const Vec3 location = Vec3::lerp(
-		camera->transform->location,
-		target_location,
-		dt * smooth_move_speed
-	);
-	Quaternion rotation = Quaternion::lerp(
-		camera->transform->rotation,
-		target_rotation,
-		dt * CAMERA_ROTATION_SPEED
-	);
-	camera->transform->set_location( location );
-	camera->transform->set_rotation( rotation );
+		const Quaternion target_rotation = ship->transform->rotation;
+		const Quaternion rotation = Quaternion::lerp(
+			camera->transform->rotation,
+			target_rotation,
+			dt * CAMERA_ROTATION_SPEED
+		);
+
+		// Apply location
+		const Vec3 location = Vec3::lerp(
+			camera->transform->location,
+			target_location,
+			dt * smooth_move_speed
+		);
+
+		// Teleport camera first frame when stopping the rearview,
+		// this could also be handled better with two distinct cameras.
+		if ( _is_rearview_enabled )
+		{
+			camera->transform->set_location( target_location );
+			camera->transform->set_rotation( target_rotation );
+			_is_rearview_enabled = false;
+		}
+		else
+		{
+			camera->transform->set_location( location );
+			camera->transform->set_rotation( rotation );
+		}
+	}
 
 	// Update up direction for roll
 	camera->up_direction = Vec3::lerp( 

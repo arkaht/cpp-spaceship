@@ -41,7 +41,7 @@ namespace spaceship
 		const Vec3 AIM_SENSITIVITY { 
 			0.4f,		//  mouse-x: roll
 			0.3f,		//  mouse-y: pitch
-			0.10f		//  Q-D: yaw
+			0.2f		//  Q-D: yaw
 		};
 		//  Aim velocity loss per second
 		const float AIM_VELOCITY_DECREASE = 5.0f;
@@ -59,7 +59,7 @@ namespace spaceship
 			2.0f		//  at max throttle
 		};
 		//  Camera distance when looking backward depending on throttle
-		const Vec2 CAMERA_LOOK_BACKWARD_DISTANCE {
+		const Vec2 CAMERA_REARVIEW_DISTANCE {
 			12.0f,		//  at min throttle
 			25.0f		//  at max throttle
 		};
@@ -90,5 +90,6 @@ namespace spaceship
 		WeakPtr<Spaceship> _wk_locked_target;
 
 		bool _last_missile_input = false;
+		bool _is_rearview_enabled = false;
 	};
 }

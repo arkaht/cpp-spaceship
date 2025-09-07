@@ -81,6 +81,10 @@ void GameInstance::setup_input_actions(InputManager* inputs)
 	look_action->assign_mouse_delta();
 	look_action->assign_gamepad_joystick( JoystickSide::Right, JoystickInputModifier::NegateY );
 
+	InputAction<bool>* rearview_action = inputs->create_action<bool>( REARVIEW_INPUT_ACTION_NAME );
+	rearview_action->assign_mouse_button( MouseButton::Middle );
+	rearview_action->assign_gamepad_button( GamepadButton::LeftShoulder );
+
 	InputAction<bool>* shoot_action = inputs->create_action<bool>( SHOOT_INPUT_ACTION_NAME );
 	shoot_action->assign_mouse_button( MouseButton::Left );
 	shoot_action->assign_gamepad_button( GamepadButton::RightTrigger );
