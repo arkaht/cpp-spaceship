@@ -5,6 +5,9 @@
 #include <suprengine/core/engine.h>
 #include <suprengine/math/easing.h>
 
+#include "spaceship/inputs.h"
+#include "suprengine/components/input-component.h"
+
 using namespace spaceship;
 
 PlayerSpaceshipController::PlayerSpaceshipController()
@@ -30,6 +33,13 @@ void PlayerSpaceshipController::setup()
 	auto camera_owner = engine.create_entity<Entity>();
 	camera = camera_owner->create_component<Camera>( projection_settings );
 	camera->set_active();
+
+	_input_component = create_component<InputComponent>(
+		InputContext {
+			.use_mouse_and_keyboard = true,
+			.gamepad_id = 0
+		}
+	);
 
 	//  test: second camera
 	camera_owner = engine.create_entity<Entity>();
@@ -61,16 +71,21 @@ void PlayerSpaceshipController::update_inputs( const float dt )
 	const InputManager* inputs = engine.get_inputs();
 	const SharedPtr<Spaceship> ship = get_ship();
 
+	const InputAction<Vec2>* move_input_action = inputs->get_action<Vec2>( MOVE_INPUT_ACTION_NAME );
+	const InputAction<Vec2>* look_input_action = inputs->get_action<Vec2>( LOOK_INPUT_ACTION_NAME );
+
+	const Vec2 move_value = _input_component->read_value( move_input_action );
+	const Vec2 look_value = _input_component->read_value( look_input_action );
+
 	// Movement inputs
-	_inputs.throttle_delta = inputs->get_keys_as_axis( PhysicalKey::S, PhysicalKey::W, 1.0f );
+	_inputs.throttle_delta = move_value.y;
 
 	// Handle aim velocity
 	{
 		// Rotation inputs
-		const Vec2 mouse_delta = -inputs->mouse_delta;
-		const float yaw_delta = inputs->get_keys_as_axis( PhysicalKey::A, PhysicalKey::D, 1.0f );
-		const float roll_delta = mouse_delta.x;
-		const float pitch_delta = mouse_delta.y;
+		const float yaw_delta = move_value.x;
+		const float roll_delta = -look_value.x;
+		const float pitch_delta = -look_value.y;
 
 		// Add inputs
 		_aim_velocity.x = math::clamp( 
@@ -123,8 +138,11 @@ void PlayerSpaceshipController::_update_shoot( float dt )
 	const InputManager* inputs = engine.get_inputs();
 	const SharedPtr<Spaceship> ship = get_ship();
 
+	const InputAction<bool>* shoot_input_action = inputs->get_action<bool>( SHOOT_INPUT_ACTION_NAME );
+	const InputAction<bool>* missile_input_action = inputs->get_action<bool>( MISSILE_INPUT_ACTION_NAME );
+
 	// Shoot
-	if ( inputs->is_mouse_button_down( MouseButton::Left ) && ship->get_shoot_time() <= 0.0f )
+	if ( _input_component->read_value( shoot_input_action ) && ship->get_shoot_time() <= 0.0f )
 	{
 		ship->shoot();
 	}
@@ -132,13 +150,16 @@ void PlayerSpaceshipController::_update_shoot( float dt )
 	// Missile
 	_wk_locked_target = ship->find_lockable_target( camera->transform->get_forward() );
 
-	if ( inputs->is_mouse_button_just_pressed( MouseButton::Right ) )
+	const bool missile_input = _input_component->read_value( missile_input_action );
+	if ( missile_input && !_last_missile_input )
 	{
 		if ( const SharedPtr<Spaceship> target = _wk_locked_target.lock() )
 		{
 			ship->launch_missiles( target->get_health_component() );
 		}
 	}
+
+	_last_missile_input = missile_input;
 }
 
 void PlayerSpaceshipController::_update_camera( const float dt )

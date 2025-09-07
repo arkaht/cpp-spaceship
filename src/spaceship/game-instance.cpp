@@ -4,6 +4,8 @@
 
 #include <suprengine/core/assets.h>
 
+#include "inputs.h"
+
 using namespace spaceship;
 
 void GameInstance::load_assets()
@@ -46,6 +48,7 @@ void GameInstance::init()
 
     // Setup inputs
     inputs->set_relative_mouse_mode( true );
+	setup_input_actions( inputs );
 
     // Setup render batch
 	OpenGLRenderBatch* render_batch = get_render_batch();
@@ -65,4 +68,24 @@ GameInfos GameInstance::get_infos() const
     infos.window.width = 1280;
 	infos.window.height = 720;
     return infos;
+}
+
+void GameInstance::setup_input_actions(InputManager* inputs)
+{
+	InputAction<Vec2>* move_action = inputs->create_action<Vec2>( MOVE_INPUT_ACTION_NAME );
+	move_action->assign_keys( Axis2D::Y, PhysicalKey::S, PhysicalKey::W );
+	move_action->assign_keys( Axis2D::X, PhysicalKey::A, PhysicalKey::D );
+	move_action->assign_gamepad_joystick( JoystickSide::Left );
+
+	InputAction<Vec2>* look_action = inputs->create_action<Vec2>( LOOK_INPUT_ACTION_NAME );
+	look_action->assign_mouse_delta();
+	look_action->assign_gamepad_joystick( JoystickSide::Right, JoystickInputModifier::NegateY );
+
+	InputAction<bool>* shoot_action = inputs->create_action<bool>( SHOOT_INPUT_ACTION_NAME );
+	shoot_action->assign_mouse_button( MouseButton::Left );
+	shoot_action->assign_gamepad_button( GamepadButton::RightTrigger );
+
+	InputAction<bool>* missile_action = inputs->create_action<bool>( MISSILE_INPUT_ACTION_NAME );
+	missile_action->assign_mouse_button( MouseButton::Right );
+	missile_action->assign_gamepad_button( GamepadButton::LeftTrigger );
 }

@@ -2,6 +2,8 @@
 
 #include <spaceship/entities/spaceship.h>
 
+#include "suprengine/components/input-component.h"
+
 namespace suprengine
 {
 	class Camera;
@@ -37,8 +39,8 @@ namespace spaceship
 	private:
 		//  Aim sensitivity for each axis
 		const Vec3 AIM_SENSITIVITY { 
-			0.025f,		//  mouse-x: roll
-			0.025f,		//  mouse-y: pitch
+			0.4f,		//  mouse-x: roll
+			0.3f,		//  mouse-y: pitch
 			0.10f		//  Q-D: yaw
 		};
 		//  Aim velocity loss per second
@@ -83,7 +85,10 @@ namespace spaceship
 
 		SharedPtr<Camera> camera;
 		SharedPtr<PlayerHUD> hud;
+		SharedPtr<InputComponent> _input_component;
 
 		WeakPtr<Spaceship> _wk_locked_target;
+
+		bool _last_missile_input = false;
 	};
 }
