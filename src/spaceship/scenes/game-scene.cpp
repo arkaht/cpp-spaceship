@@ -6,6 +6,8 @@
 
 #include <suprengine/core/assets.h>
 
+#include "spaceship/player-manager.h"
+
 using namespace spaceship;
 
 GameScene::GameScene( GameInstance* game_instance )
@@ -46,16 +48,12 @@ void GameScene::init()
 		asteroid->update_collision_to_transform();
 	}
 
-	// Spawn player spaceship
-	spaceship1 = engine.create_entity<Spaceship>();
-	spaceship1->set_color( Color::from_0x( 0xf2cd13FF ) );
-	spaceship1->transform->location = _player_location;
-	spaceship1->transform->rotation = _player_rotation;
+	_player_manager = std::make_unique<PlayerManager>( *engine.get_inputs() );
 
-	// Possess it by player
-	player_controller = engine.create_entity<PlayerSpaceshipController>();
-	player_controller->possess( spaceship1 );
-	
+	// Spawn first player
+	player_controller = _player_manager->create_player( _player_location, _player_rotation, 0 );
+	spaceship1 = player_controller->get_ship();
+
 	// Spawn second spaceship
 	spaceship2 = engine.create_entity<Spaceship>();
 	spaceship2->set_color( Color::from_0x( 0x9213f2FF ) );
@@ -64,10 +62,10 @@ void GameScene::init()
 	// Possess it by AI
 	ai_controller = engine.create_entity<AISpaceshipController>();
 	ai_controller->possess( spaceship2 );
-	ai_controller->wk_target = spaceship1;
+	//ai_controller->wk_target = spaceship1;
 
 	// Instantiate temporary camera
-	CameraProjectionSettings projection_settings = player_controller->get_camera()->projection_settings;
+	CameraProjectionSettings projection_settings = player_controller->get_camera()->get_projection_settings();
 	projection_settings.fov = 50.0f;
 	projection_settings.znear = 10.0f;
 

@@ -8,9 +8,10 @@
 #include <spaceship/entities/ai-spaceship-controller.h>
 #include <spaceship/entities/asteroid.h>
 
-namespace spaceship 
+namespace spaceship
 {
 	class GameInstance;
+	class PlayerManager;
 
 	class GameScene : public Scene
 	{
@@ -26,14 +27,15 @@ namespace spaceship
 		SharedPtr<Spaceship> spaceship1;
 		SharedPtr<Spaceship> spaceship2;
 
-		GameInstance* _game_instance { nullptr };
+		GameInstance* _game_instance = nullptr;
+		std::unique_ptr<PlayerManager> _player_manager = nullptr;
 
 		SharedPtr<PlayerSpaceshipController> player_controller;
 		SharedPtr<AISpaceshipController> ai_controller;
 
 		float spawn_time { 0.0f };
 
-		unsigned int _seed = (unsigned int)std::time( nullptr );
+		uint32 _seed = static_cast<unsigned int>(std::time(nullptr));
 
 		SharedPtr<Camera> _temporary_camera;
 		SharedPtr<ModelRenderer> _temporary_camera_model;

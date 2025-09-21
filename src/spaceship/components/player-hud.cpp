@@ -98,9 +98,13 @@ void PlayerHUD::update( float dt )
 
 void PlayerHUD::render( RenderBatch* render_batch )
 {
+	const SharedPtr<Camera> camera = render_batch->get_camera();
+
+	// Only render for the owner.
+	if ( camera != _controller->get_camera() ) return;
+
 	Engine& engine = Engine::instance();
 	const Window* window = engine.get_window();
-	const Camera* camera = engine.get_camera( 0 );
 
 	const SharedPtr<Spaceship> spaceship = _controller->get_ship();
 	if ( !spaceship ) return;

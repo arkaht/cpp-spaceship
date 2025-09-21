@@ -11,6 +11,12 @@
 using namespace spaceship;
 
 PlayerSpaceshipController::PlayerSpaceshipController()
+	: _input_context( InputContext { .use_mouse_and_keyboard = true, .gamepad_id = 0 } )
+{
+}
+
+PlayerSpaceshipController::PlayerSpaceshipController(const InputContext& input_context)
+	: _input_context( input_context )
 {}
 
 PlayerSpaceshipController::~PlayerSpaceshipController()
@@ -24,26 +30,17 @@ void PlayerSpaceshipController::setup()
 
 	hud = create_component<PlayerHUD>( as<PlayerSpaceshipController>() );
 
-	//  setup camera settings
+	// Setup camera settings
 	CameraProjectionSettings projection_settings {};
 	projection_settings.znear = 1.0f;
 	projection_settings.zfar = 10000.0f;
 
-	//  initialize camera
+	// Initialize camera
 	auto camera_owner = engine.create_entity<Entity>();
 	camera = camera_owner->create_component<Camera>( projection_settings );
 	camera->set_active();
 
-	_input_component = create_component<InputComponent>(
-		InputContext {
-			.use_mouse_and_keyboard = true,
-			.gamepad_id = 0
-		}
-	);
-
-	//  test: second camera
-	camera_owner = engine.create_entity<Entity>();
-	camera_owner->transform->scale = Vec3( 10.0f );
+	_input_component = create_component<InputComponent>( _input_context );
 }
 
 void PlayerSpaceshipController::update_this( const float dt )
