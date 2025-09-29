@@ -67,6 +67,7 @@ GameInfos GameInstance::get_infos() const
     infos.window.title = "Spaceship X";
     infos.window.width = 1280;
 	infos.window.height = 720;
+	infos.window.is_resizable = true;
     return infos;
 }
 

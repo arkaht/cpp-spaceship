@@ -24,8 +24,7 @@ void StylizedModelRenderer::render( RenderBatch* render_batch )
 	float offset_scale = 1.0f;
 	if ( dynamic_camera_distance_settings.is_active )
 	{
-		const Engine& engine = Engine::instance();
-		const Camera* camera = engine.get_camera( 0 );
+		const SharedPtr<Camera> camera = render_batch->get_camera();
 
 		// Compute distances
 		const Vec3 dist = transform->location - camera->transform->location;

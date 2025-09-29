@@ -6,6 +6,8 @@
 
 #include <suprengine/core/assets.h>
 
+#include "spaceship/player-manager.h"
+
 using namespace spaceship;
 
 GameScene::GameScene( GameInstance* game_instance )
@@ -46,28 +48,27 @@ void GameScene::init()
 		asteroid->update_collision_to_transform();
 	}
 
-	// Spawn player spaceship
-	spaceship1 = engine.create_entity<Spaceship>();
-	spaceship1->set_color( Color::from_0x( 0xf2cd13FF ) );
-	spaceship1->transform->location = _player_location;
-	spaceship1->transform->rotation = _player_rotation;
+	_player_manager = std::make_unique<PlayerManager>( *engine.get_inputs() );
 
-	// Possess it by player
-	player_controller = engine.create_entity<PlayerSpaceshipController>();
-	player_controller->possess( spaceship1 );
-	
+	// Spawn first player
+	const SharedPtr<PlayerSpaceshipController> player_controller = _player_manager->create_player( _player_location, _player_rotation, 0 );
+	_spaceship1 = player_controller->get_ship();
+	_player_controller = player_controller;
+
 	// Spawn second spaceship
-	spaceship2 = engine.create_entity<Spaceship>();
+	const SharedPtr<Spaceship> spaceship2 = engine.create_entity<Spaceship>();
 	spaceship2->set_color( Color::from_0x( 0x9213f2FF ) );
 	spaceship2->transform->location = Vec3 { 50.0f, 0.0f, 0.0f };
+	_spaceship2 = spaceship2;
 
 	// Possess it by AI
-	ai_controller = engine.create_entity<AISpaceshipController>();
+	const SharedPtr<AISpaceshipController> ai_controller = engine.create_entity<AISpaceshipController>();
 	ai_controller->possess( spaceship2 );
-	ai_controller->wk_target = spaceship1;
+	_ai_controller = ai_controller;
+	//ai_controller->wk_target = spaceship1;
 
 	// Instantiate temporary camera
-	CameraProjectionSettings projection_settings = player_controller->get_camera()->projection_settings;
+	CameraProjectionSettings projection_settings = player_controller->get_camera()->get_projection_settings();
 	projection_settings.fov = 50.0f;
 	projection_settings.znear = 10.0f;
 
@@ -83,27 +84,6 @@ void GameScene::update( const float dt )
 	Engine& engine = Engine::instance();
 	const InputManager* inputs = engine.get_inputs();
 
-	// Switch spaceship possession
-	if ( inputs->is_key_just_pressed( PhysicalKey::One ) )
-	{
-		player_controller->possess( spaceship1 );
-		ai_controller->possess( spaceship2 );
-	}
-	if ( inputs->is_key_just_pressed( PhysicalKey::Two ) )
-	{
-		player_controller->possess( spaceship2 );
-	}
-
-	if ( ( spawn_time -= dt ) <= 0.0f )
-	{
-		SharedPtr<ExplosionEffect> explosion = engine.create_entity<ExplosionEffect>(
-			15.0f,
-			random::generate_color()
-		);
-		explosion->transform->location = Vec3 { 0.0f, 100.0f, 0.0f };
-		spawn_time += 2.5f;
-	}
-	
 	// Window mode toggle
 	if ( inputs->is_key_just_pressed( PhysicalKey::F1 ) )
 	{
@@ -122,6 +102,28 @@ void GameScene::update( const float dt )
 		OpenGLRenderBatch* renderer = _game_instance->get_render_batch();
 		renderer->set_samples( renderer->get_samples() == 0 ? 8 : 0 );
 	}
+
+	// Switch spaceship possession
+	/*if ( inputs->is_key_just_pressed( PhysicalKey::One ) )
+	{
+		player_controller->possess( spaceship1 );
+		ai_controller->possess( spaceship2 );
+	}
+	if ( inputs->is_key_just_pressed( PhysicalKey::Two ) )
+	{
+		player_controller->possess( spaceship2 );
+	}
+
+	if ( ( spawn_time -= dt ) <= 0.0f )
+	{
+		SharedPtr<ExplosionEffect> explosion = engine.create_entity<ExplosionEffect>(
+			15.0f,
+			random::generate_color()
+		);
+		explosion->transform->location = Vec3 { 0.0f, 100.0f, 0.0f };
+		spawn_time += 2.5f;
+	}
+
 	if ( inputs->is_key_just_pressed( PhysicalKey::F3 ) )
 	{
 		const SharedPtr<Spaceship> spaceship = player_controller->get_ship();
@@ -193,7 +195,7 @@ void GameScene::update( const float dt )
 					+ random::generate_direction() * random::generate( 100.0f, 200.0f );
 			} );
 		}
-	}
+	}*/
 }
 
 void GameScene::generate_ai_spaceships( const int count )

@@ -26,7 +26,7 @@ namespace spaceship
 	{
 	public:
 		explicit PlayerHUD(
-			SharedPtr<PlayerSpaceshipController> owner
+			const SharedPtr<PlayerSpaceshipController>& owner
 		);
 		~PlayerHUD();
 
@@ -37,6 +37,8 @@ namespace spaceship
 		{
 			return RenderPhase::Viewport;
 		}
+
+		SharedPtr<PlayerSpaceshipController> get_controller() const;
 
 	private:
 		const float CROSSHAIR_DISTANCE = 500.0f;
@@ -61,10 +63,10 @@ namespace spaceship
 		const float HIT_TIME = 0.25f;
 
 	private:
-		void _on_possess_changed( SharedPtr<Spaceship> previous, SharedPtr<Spaceship> current );
+		void _on_possess_changed(SharedPtr<Spaceship> previous, SharedPtr<Spaceship> current);
 
-		void _bind_to_spaceship( SharedPtr<Spaceship> spaceship );
-		void _unbind_from_spaceship( SharedPtr<Spaceship> spaceship );
+		void _bind_to_spaceship(const SharedPtr<Spaceship>& spaceship );
+		void _unbind_from_spaceship(const SharedPtr<Spaceship>& spaceship );
 
 		void _draw_crosshair( 
 			RenderBatch* render_batch, 
@@ -81,6 +83,6 @@ namespace spaceship
 		std::vector<KillIconData> _kill_icons {};
 		float _hit_time = 0.0f;
 
-		SharedPtr<PlayerSpaceshipController> _controller = nullptr;
+		WeakPtr<PlayerSpaceshipController> _controller {};
 	};
 }

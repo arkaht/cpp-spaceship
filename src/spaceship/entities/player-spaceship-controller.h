@@ -19,6 +19,7 @@ namespace spaceship
 	{
 	public:
 		PlayerSpaceshipController();
+		explicit PlayerSpaceshipController(const InputContext& input_context);
 		~PlayerSpaceshipController();
 
 		void setup() override;
@@ -32,6 +33,7 @@ namespace spaceship
 		SharedPtr<Spaceship> get_locked_target() const { return _wk_locked_target.lock(); }
 		SharedPtr<Camera> get_camera() const { return camera; }
 		SharedPtr<PlayerHUD> get_hud() const { return hud; }
+		SharedPtr<InputComponent> get_input_component() const { return _input_component;}
 
 	public:
 		bool is_inputs_enabled = true;
@@ -82,6 +84,8 @@ namespace spaceship
 
 	private:
 		Vec3 _aim_velocity = Vec3::zero;
+
+		InputContext _input_context;
 
 		SharedPtr<Camera> camera;
 		SharedPtr<PlayerHUD> hud;
