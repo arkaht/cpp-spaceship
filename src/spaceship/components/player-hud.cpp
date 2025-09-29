@@ -8,12 +8,12 @@
 
 using namespace spaceship;
 
-PlayerHUD::PlayerHUD( 
-	SharedPtr<PlayerSpaceshipController> owner
+PlayerHUD::PlayerHUD(
+	const SharedPtr<PlayerSpaceshipController>& owner
 )
 	: _controller( owner )
 {
-	_controller->on_possess_changed.listen( &PlayerHUD::_on_possess_changed, this );
+	owner->on_possess_changed.listen( &PlayerHUD::_on_possess_changed, this );
 
 	_crosshair_line_texture = Assets::get_texture( "crosshair-line" );
 	_kill_icon_texture = Assets::get_texture( "kill-icon" );
@@ -22,16 +22,16 @@ PlayerHUD::PlayerHUD(
 
 PlayerHUD::~PlayerHUD()
 {
-	if ( !_controller ) return;
-
-	_controller->on_possess_changed.unlisten( &PlayerHUD::_on_possess_changed, this );
-
-	_unbind_from_spaceship( _controller->get_ship() );
+	if ( const SharedPtr<PlayerSpaceshipController> controller = get_controller() )
+	{
+		controller->on_possess_changed.unlisten( &PlayerHUD::_on_possess_changed, this );
+		_unbind_from_spaceship( controller->get_ship() );
+	}
 }
 
 void PlayerHUD::update( float dt )
 {
-	auto spaceship = _controller->get_ship();
+	const SharedPtr<Spaceship> spaceship = get_controller()->get_ship();
 	if ( !spaceship ) return;
 
 	_hit_time = math::max( 0.0f, _hit_time - dt );
@@ -45,18 +45,18 @@ void PlayerHUD::update( float dt )
 	int column = 0;
 	for ( auto itr = _kill_icons.begin(); itr != _kill_icons.end(); )
 	{
-		auto& data = *itr;
+		KillIconData& data = *itr;
 
 		//  update x-offset
-		float target_x = column * ( KILL_X_GAP + KILL_ICON_SIZE );
+		const float target_x = static_cast<float>( column ) * ( KILL_X_GAP + KILL_ICON_SIZE );
 		if ( data.x_offset == -1.0f )
 		{
 			data.x_offset = target_x;
 		}
 		else 
 		{
-			data.x_offset = math::lerp( 
-				data.x_offset, 
+			data.x_offset = math::lerp(
+				data.x_offset,
 				target_x,
 				dt * KILL_X_SPEED
 			);
@@ -66,22 +66,22 @@ void PlayerHUD::update( float dt )
 		{
 			data.life_time = math::max( 0.0f, data.life_time - dt );
 
-			float color_speed = dt * KILL_COLOR_IN_SPEED;
+			const float color_speed = dt * KILL_COLOR_IN_SPEED;
 			data.color.r = math::lerp( data.color.r, data.target_color.r, color_speed );
 			data.color.g = math::lerp( data.color.g, data.target_color.g, color_speed );
 			data.color.b = math::lerp( data.color.b, data.target_color.b, color_speed );
 			data.color.a = math::lerp( data.color.a, data.target_color.a, dt * KILL_ALPHA_IN_SPEED );
 
-			data.scale = easing::out_expo( 
+			data.scale = easing::out_expo(
 				math::min( KILL_SCALE_TIME, KILL_TIME - data.life_time ) / KILL_SCALE_TIME );
 			
 			column++;
 		}
 		else
 		{
-			data.color.a = math::lerp( 
-				data.color.a, 
-				(uint8_t)0,
+			data.color.a = math::lerp(
+				data.color.a,
+				static_cast<uint8_t>( 0 ),
 				dt * KILL_ALPHA_OUT_SPEED
 			);
 
@@ -98,15 +98,16 @@ void PlayerHUD::update( float dt )
 
 void PlayerHUD::render( RenderBatch* render_batch )
 {
+	const SharedPtr<PlayerSpaceshipController> controller = get_controller();
 	const SharedPtr<Camera> camera = render_batch->get_camera();
 
 	// Only render for the owner.
-	if ( camera != _controller->get_camera() ) return;
+	if ( camera != controller->get_camera() ) return;
 
 	Engine& engine = Engine::instance();
 	const Window* window = engine.get_window();
 
-	const SharedPtr<Spaceship> spaceship = _controller->get_ship();
+	const SharedPtr<Spaceship> spaceship = controller->get_ship();
 	if ( !spaceship ) return;
 
 	const Vec2 window_size = window->get_size();
@@ -143,7 +144,7 @@ void PlayerHUD::render( RenderBatch* render_batch )
 	}
 
 	//  render missile-locking target
-	SharedPtr<Spaceship> target = _controller->get_locked_target();
+	SharedPtr<Spaceship> target = controller->get_locked_target();
 	if ( target )
 	{
 		Vec3 target_pos = camera->world_to_viewport( target->transform->location );
@@ -161,13 +162,18 @@ void PlayerHUD::render( RenderBatch* render_batch )
 	}
 }
 
+SharedPtr<PlayerSpaceshipController> PlayerHUD::get_controller() const
+{
+	return _controller.lock();
+}
+
 void PlayerHUD::_on_possess_changed( SharedPtr<Spaceship> previous, SharedPtr<Spaceship> current )
 {
 	_unbind_from_spaceship( previous );
 	_bind_to_spaceship( current );
 }
 
-void PlayerHUD::_bind_to_spaceship( SharedPtr<Spaceship> spaceship )
+void PlayerHUD::_bind_to_spaceship( const SharedPtr<Spaceship>& spaceship )
 {
 	if ( !spaceship ) return;
 
@@ -178,7 +184,7 @@ void PlayerHUD::_bind_to_spaceship( SharedPtr<Spaceship> spaceship )
 	spaceship->on_hit.listen( &PlayerHUD::_on_spaceship_hit, this );
 }
 
-void PlayerHUD::_unbind_from_spaceship( SharedPtr<Spaceship> spaceship )
+void PlayerHUD::_unbind_from_spaceship( const SharedPtr<Spaceship>& spaceship )
 {
 	if ( !spaceship ) return;
 
@@ -190,7 +196,7 @@ void PlayerHUD::_draw_crosshair(
 	const Vec2& pos
 )
 {
-	const SharedPtr<Spaceship> spaceship = _controller->get_ship();
+	const SharedPtr<Spaceship> spaceship = get_controller()->get_ship();
 
 	const float angle_iter = math::DOUBLE_PI / static_cast<float>( CROSSHAIR_LINES_COUNT );
 

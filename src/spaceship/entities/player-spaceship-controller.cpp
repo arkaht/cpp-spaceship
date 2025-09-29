@@ -21,7 +21,10 @@ PlayerSpaceshipController::PlayerSpaceshipController(const InputContext& input_c
 
 PlayerSpaceshipController::~PlayerSpaceshipController()
 {
-	camera->get_owner()->kill();
+	if ( const SharedPtr<Entity> camera_owner = camera->get_owner() )
+	{
+		camera_owner->kill();
+	}
 }
 
 void PlayerSpaceshipController::setup()
