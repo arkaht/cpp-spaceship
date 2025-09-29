@@ -1,10 +1,10 @@
 ﻿#include "player-manager.h"
 
-#include "suprengine/core/engine.h"
-#include "suprengine/input/input-manager.h"
-
 #include "entities/player-spaceship-controller.h"
 #include "entities/spaceship.h"
+
+#include "suprengine/core/engine.h"
+#include "suprengine/input/input-manager.h"
 #include "suprengine/utils/random.h"
 
 using namespace spaceship;
