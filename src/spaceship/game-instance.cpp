@@ -4,7 +4,7 @@
 
 #include <suprengine/core/assets.h>
 
-#include <suprengine/data/shader-asset-info.h>
+#include <suprengine/data/shader/shader-asset-info.h>
 
 #include "inputs.h"
 
@@ -13,11 +13,14 @@ using namespace spaceship;
 void GameInstance::load_assets()
 {
     // Shaders
-	Assets::load_shader(
-		"stylized",
-		ShaderAssetInfo {
-			.vertex_path = "assets/spaceship/shaders/stylized.vert",
-			.fragment_path = "assets/spaceship/shaders/stylized.frag",
+	Assets::load_shader_program(
+		ShaderProgramAssetInfo {
+			.name = "stylized",
+			.shaders =
+			{
+				{ "assets/spaceship/shaders/stylized.vert", ShaderType::Vertex },
+				{ "assets/spaceship/shaders/stylized.frag", ShaderType::Fragment },
+			},
 		}
 	);
 
