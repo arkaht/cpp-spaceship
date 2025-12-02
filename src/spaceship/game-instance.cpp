@@ -4,6 +4,8 @@
 
 #include <suprengine/core/assets.h>
 
+#include <suprengine/data/shader-asset-info.h>
+
 #include "inputs.h"
 
 using namespace spaceship;
@@ -13,17 +15,19 @@ void GameInstance::load_assets()
     // Shaders
 	Assets::load_shader(
 		"stylized",
-		"assets/spaceship/shaders/stylized.vert",
-		"assets/spaceship/shaders/stylized.frag"
+		ShaderAssetInfo {
+			.vertex_path = "assets/spaceship/shaders/stylized.vert",
+			.fragment_path = "assets/spaceship/shaders/stylized.frag",
+		}
 	);
 
 	// Textures
-	Assets::load_texture( 
-		"crosshair-line", 
+	Assets::load_texture(
+		"crosshair-line",
 		"assets/spaceship/sprites/crosshair-line.png" 
 	);
-	Assets::load_texture( 
-		"kill-icon", 
+	Assets::load_texture(
+		"kill-icon",
 		"assets/spaceship/sprites/kill-icon.png" 
 	);
 
